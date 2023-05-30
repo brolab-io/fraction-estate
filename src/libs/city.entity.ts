@@ -8,6 +8,7 @@ import {
   StandardMaterial,
 } from "@babylonjs/core";
 import { MyScene } from "./MyScene";
+import useEstateStore from "@/services/store";
 
 export class CityEntity {
   _ground: AbstractMesh;
@@ -37,6 +38,8 @@ export class CityEntity {
     const DEFAULT_COLOR = Color3.FromHexString("#8152ca");
     const ACTIVE_COLOR = Color3.FromHexString("#ff0000");
 
+    const store = useEstateStore.getState();
+
     for (const mesh of allMeshes) {
       if (mesh.name.toLowerCase().startsWith("cube")) {
         const material = new StandardMaterial("cubeMat", this._scene);
@@ -47,6 +50,7 @@ export class CityEntity {
         mesh.actionManager.registerAction(
           new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
             material.diffuseColor = ACTIVE_COLOR;
+            store.selectToken(mesh.name);
           })
         );
         // Handle hover to change color

@@ -1,13 +1,4 @@
-import {
-  AbstractMesh,
-  ArcRotateCamera,
-  Engine,
-  HemisphericLight,
-  Mesh,
-  Scene,
-  SceneLoader,
-  Vector3,
-} from "@babylonjs/core";
+import { AbstractMesh, ArcRotateCamera, Engine, Mesh, Scene, Vector3 } from "@babylonjs/core";
 import { Environment } from "./environment";
 import { CityEntity } from "./city.entity";
 
@@ -56,8 +47,6 @@ export class MyScene extends Scene {
     const normalizedRadius = (clampedRadius - minRadius) / (maxRadius - minRadius);
     const mappedSensibility =
       (1 - normalizedRadius) * minSensibility + normalizedRadius * maxSensibility;
-
-    console.log(mappedSensibility);
 
     this._camera.panningSensibility = mappedSensibility;
   }
