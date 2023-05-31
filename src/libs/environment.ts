@@ -1,10 +1,9 @@
-import { Color4, HemisphericLight, Vector3 } from "@babylonjs/core";
-import { MyScene } from "./MyScene";
+import { Color4, HemisphericLight, Scene, Vector3 } from "@babylonjs/core";
 
 export class Environment {
-  private _scene: MyScene;
+  private _scene: Scene;
 
-  constructor(scene: MyScene) {
+  constructor(scene: Scene) {
     this._scene = scene;
   }
 

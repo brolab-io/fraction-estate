@@ -1,9 +1,13 @@
+"use client";
 import AssetModal from "@/components/Home/AssetModal";
 import ConnectWallet from "@/components/Home/ConnectWallet";
 import SearchBar from "@/components/Home/SearchBar";
 import SpaceScene from "@/components/Home/SpaceScene";
+import useFractions from "@/hooks/useFractions";
 
 const HomePage = () => {
+  useFractions();
+
   return (
     <main className="relative w-full h-full">
       <SpaceScene />

@@ -1,5 +1,5 @@
 "use client";
-import { MyScene } from "@/libs/MyScene";
+import { CityScene } from "@/libs/CityScene";
 import { Engine } from "@babylonjs/core";
 import { memo, PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
@@ -23,7 +23,7 @@ const SpaceScene: React.FC<PropsWithChildren> = ({ children }) => {
 
   const setupSpace = useCallback(() => {
     const engine = new Engine(canvasRef.current);
-    const scene = new MyScene(engine);
+    const scene = new CityScene(engine);
     return () => {
       scene.dispose();
       engine.dispose();

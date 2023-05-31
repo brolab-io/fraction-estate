@@ -1,60 +1,87 @@
 "use client";
 import Button from "@/components/CommonUI/Button";
 import Container from "@/components/CommonUI/Container";
+import Input from "@/components/CommonUI/Input";
+import { CONTRACT_NFT_ADDRESS } from "@/configs/contract";
+import useCreateFraction from "@/hooks/useCreateFraction";
+import { utils } from "ethers";
 import { useState } from "react";
 
-export const metdata = {
+export const metadata = {
   title: "Create Fraction",
   description: "Create a new fraction",
 };
 
 const CreateFractionPage = () => {
-  const [title, setTitle] = useState<string>("");
+  const [tokenId, setTokenId] = useState<string>("0");
+  const [royaltyPercentage, setRoyaltyPercentage] = useState<string>("15");
+  const [supply, setSupply] = useState<string>("1000000");
+  const [tokenName, setTokenName] = useState<string>("BLC");
+  const [tokenTicker, setTokenTicker] = useState<string>("1000");
 
-  const handleCreateProposal = async (e: React.FormEvent<HTMLFormElement>) => {
+  const { mutateAsync, isLoading } = useCreateFraction();
+
+  const handleCreateFraction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    await mutateAsync({
+      tokenContract: CONTRACT_NFT_ADDRESS.replace("0x", "xdc"),
+      tokenId,
+      royaltyPercentage,
+      supply: utils.parseEther(supply).toString(),
+      tokenName,
+      tokenTicker,
+    });
   };
 
   return (
     <Container className="!max-w-[900px]">
       <form
-        onSubmit={handleCreateProposal}
-        className="bg-[#0C121D] rounded-[16px] mb-16 mt-8 py-12 px-20"
+        onSubmit={handleCreateFraction}
+        className="bg-[#0C121D] rounded-[16px] mb-16 mt-8 py-12 px-20 space-y-3 lg:space-y-5"
       >
-        <h1 className="text-white text-[32px] font-bold">Create Proposal</h1>
+        <h1 className="text-white text-[32px] font-bold">Create Fraction</h1>
 
-        <div className="mt-[26px]">
-          <label htmlFor="title" className="text-white font-semibold text-[15px]">
-            Title *
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter the title of your proposal"
-            className="w-full bg-[#FFFFFF] bg-opacity-[3%] text-white placeholder:text-[#808080] rounded-[10px] p-6 mt-2"
-            required
-          />
-        </div>
-        <div className="mt-[26px]">
-          <label htmlFor="title" className="text-white font-semibold text-[15px]">
-            TokenId *
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter the title of your proposal"
-            className="w-full bg-[#FFFFFF] bg-opacity-[3%] text-white placeholder:text-[#808080] rounded-[10px] p-6 mt-2"
-            required
-          />
-        </div>
+        <Input
+          label="Contract Address"
+          disabled
+          value={CONTRACT_NFT_ADDRESS}
+          onChange={(e) => {}}
+        />
+        <Input
+          label="TokenId *"
+          value={tokenId}
+          onChange={(e) => setTokenId(e.target.value)}
+          placeholder="Enter Token ID"
+        />
+        <Input
+          label="Royalty Percentage *"
+          value={royaltyPercentage}
+          placeholder="Enter Royalty Percentage"
+          onChange={(e) => setRoyaltyPercentage(e.target.value)}
+        />
+        <Input
+          label="Supply *"
+          value={supply}
+          placeholder="Enter Supply"
+          onChange={(e) => setSupply(e.target.value)}
+        />
+        <Input
+          label="Token Name *"
+          value={tokenName}
+          placeholder="Enter Token Name"
+          onChange={(e) => setTokenName(e.target.value)}
+        />
+        <Input
+          label="Token Ticker *"
+          value={tokenTicker}
+          placeholder="Enter Token Ticker"
+          onChange={(e) => setTokenTicker(e.target.value)}
+        />
 
         <div className="flex items-center justify-between w-full mt-6">
           <div />
-          <Button isLoading={true} type="submit" className="rounded-md">
+          <Button isLoading={isLoading} type="submit" className="rounded-md">
+            Create Fraction{" "}
             <svg
               width="19"
               height="19"

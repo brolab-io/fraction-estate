@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "./FractionToken.sol";
 
 contract FractionalizeNFT is IERC721Receiver {
+    uint256 private _depositCount;
+    mapping(uint256 => DepositInfo) private _idToDepositInfos;
+
     mapping(address => DepositFolder) AccessDeposits;
     mapping(address => mapping(uint256 => uint256)) NftIndex;
 
@@ -78,6 +81,11 @@ contract FractionalizeNFT is IERC721Receiver {
         AccessDeposits[msg.sender]
             .Deposit[index]
             .fractionContractAddress = address(fractionToken);
+
+        _idToDepositInfos[_depositCount] = AccessDeposits[msg.sender].Deposit[
+            index
+        ];
+        _depositCount++;
     }
 
     //can withdraw the NFT if you own the total supply
@@ -108,6 +116,15 @@ contract FractionalizeNFT is IERC721Receiver {
 
         uint256 index = NftIndex[NFTAddress][NFTId];
         delete AccessDeposits[msg.sender].Deposit[index];
+    }
+
+    function getDepositInfos() public view returns (DepositInfo[] memory) {
+        uint256 length = _depositCount;
+        DepositInfo[] memory depositInfos = new DepositInfo[](_depositCount);
+        for (uint256 i = 0; i < _depositCount; i++) {
+            depositInfos[i] = _idToDepositInfos[i];
+        }
+        return depositInfos;
     }
 
     // function withdrawNftNotFractionalized(address _NftContract, address _NftId) public {

@@ -7,13 +7,13 @@ import {
   SceneLoader,
   StandardMaterial,
 } from "@babylonjs/core";
-import { MyScene } from "./MyScene";
+import { CityScene } from "./CityScene";
 import useEstateStore from "@/services/store";
 
 export class CityEntity {
   _ground: AbstractMesh;
 
-  constructor(private readonly _scene: MyScene) {
+  constructor(private readonly _scene: CityScene) {
     this._ground = this._scene.getMeshByName("ground")!;
   }
 

@@ -46,6 +46,9 @@ dependencies:
   eslint-config-next:
     specifier: 13.4.4
     version: 13.4.4(eslint@8.41.0)(typescript@5.0.4)
+  ethers:
+    specifier: ^5
+    version: 5.7.2
   lokijs:
     specifier: ^1.5.12
     version: 1.5.12
