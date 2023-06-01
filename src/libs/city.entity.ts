@@ -40,6 +40,7 @@ export class CityEntity {
 
     const store = useEstateStore.getState();
 
+    let id = 0;
     for (const mesh of allMeshes) {
       if (mesh.name.toLowerCase().startsWith("cube")) {
         const material = new StandardMaterial("cubeMat", this._scene);
@@ -47,10 +48,13 @@ export class CityEntity {
         mesh.material = material;
         // Handle click to change color
         mesh.actionManager = new ActionManager(this._scene);
+
+        const realEstateStateId = id;
+        id++;
         mesh.actionManager.registerAction(
           new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
             material.diffuseColor = ACTIVE_COLOR;
-            store.selectToken(mesh.name);
+            store.selectRealEstateState(realEstateStateId);
           })
         );
         // Handle hover to change color

@@ -1,17 +1,24 @@
+import { RealEstateState } from "@/types/RealEstateState";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
 interface EstateState {
-  tokens: string[];
-  selectedToken: string;
-  selectToken: (token: string) => void;
+  realEstateStates: RealEstateState[];
+  setRealEstateStates: (realEstateStates: RealEstateState[]) => void;
+  selectedRealEstateState: RealEstateState | undefined;
+  selectRealEstateState: (index: number) => void;
 }
 
 const useEstateStore = create<EstateState>()(
-  devtools((set) => ({
-    tokens: [],
-    selectedToken: "",
-    selectToken: (token: string) => set({ selectedToken: token }),
+  devtools((set, get) => ({
+    realEstateStates: [],
+    selectedRealEstateState: undefined,
+    selectRealEstateState: (index: number) => {
+      set({ selectedRealEstateState: get().realEstateStates[index] });
+    },
+    setRealEstateStates: (realEstateStates: RealEstateState[]) => {
+      set({ realEstateStates });
+    },
   }))
 );
 

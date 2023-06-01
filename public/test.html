@@ -7,80 +7,88 @@
     <title>Test</title>
   </head>
   <body>
-    <button id="check-approved">Check Approved</button>
-    <button id="approve-nft">Approve NFT</button>
-    <button id="deposit-nft">Deposit NFT</button>
-    <button id="create-fraction">Create Fraction</button>
+    <input id="id" type="text" value="1" />
+    <br />
+    <button id="create">Create RealEstate</button>
+    <button id="get">Get RealEstate</button>
+    <button id="buy">Buy Fraction</button>
   </body>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="./test.js"></script>
   <script>
-    const FRACTION_CONTRACT_ADDRESS = "0x06f9FaB6E5B3ed806C5C320380DefE9d8fdDE38b";
-    const NFT_CONTRACT_ADDRESS = "0xdD788D42faBb505FA21079f956Ea71e069819996";
+    const TOKEN_CONTRACT_ADDRESS = "0x25Be75c6105830758c191C9209c37bcc0B4954D1";
+    const NFT_CONTRACT_ADDRESS = "0x61cF893efE973c06FbbE3935CDEc880022Db714a";
 
-    const TOKEN_ID = 2;
-
-    const checkApproved = document.getElementById("check-approved");
-    checkApproved.addEventListener("click", async () => {
+    const getRealEstate = async () => {
+      const realEstateId = document.getElementById("id").value;
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const abi = ["function getApproved(uint256) view returns (address)"];
       const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, abi, signer);
-      const approvedAddress = await contract.getApproved(TOKEN_ID);
-      console.log(approvedAddress, "==", FRACTION_CONTRACT_ADDRESS);
-    });
+      const realEstate = await contract.getRealEstate(realEstateId);
+      console.log(realEstate);
+      return realEstate;
+    };
 
-    const approveNFT = document.getElementById("approve-nft");
-    approveNFT.addEventListener("click", async () => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const abi = ["function approve(address, uint256)"];
-      const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, abi, signer);
-      const tx = await contract.approve(FRACTION_CONTRACT_ADDRESS, TOKEN_ID, {
-        gasLimit: 3000000,
-        gasPrice: ethers.utils.parseEther("0.000000003"),
-      });
-      const receipt = await tx.wait();
-      console.log(receipt);
-    });
+    const getRealEstateButton = document.getElementById("get");
+    getRealEstateButton.addEventListener("click", getRealEstate);
 
-    const depositNFT = document.getElementById("deposit-nft");
-    depositNFT.addEventListener("click", async () => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const abi = ["function depositNft(address, uint256)"];
-      const contract = new ethers.Contract(FRACTION_CONTRACT_ADDRESS, abi, signer);
-      const tx = await contract.depositNft(NFT_CONTRACT_ADDRESS, TOKEN_ID, {
-        gasLimit: 30000000,
-        gasPrice: ethers.utils.parseEther("0.000000003"),
-      });
-      const receipt = await tx.wait();
-      console.log(receipt);
-    });
-
-    const createFraction = document.getElementById("create-fraction");
+    const createFraction = document.getElementById("create");
     createFraction.addEventListener("click", async () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const abi = [
-        "function createFraction(address, uint256, uint256, uint256, string memory, string memory)",
-      ];
-      const contract = new ethers.Contract(FRACTION_CONTRACT_ADDRESS, abi, signer);
+      const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, abi, signer);
       const args = [
-        NFT_CONTRACT_ADDRESS,
-        TOKEN_ID,
+        "JAMONA GOLDEN SILK",
+        "https://pindias-api.mtwdev.link/v1/metadata/6458a46a18209cf8307f3b5b.json",
+        ethers.utils.parseEther("2499"),
+        100,
         15,
-        ethers.utils.parseEther("1000000").toString(),
-        "BLC",
-        "BLC",
+        242,
+        TOKEN_CONTRACT_ADDRESS,
       ];
       console.log(args);
-      const tx = await contract.createFraction(...args, {
+      const tx = await contract.createRealEstate(...args, {
         gasLimit: 30000000,
         gasPrice: ethers.utils.parseEther("0.000000003"),
       });
       console.log(tx);
       const receipt = await tx.wait();
       console.log(receipt);
+    });
+
+    const buyFraction = document.getElementById("buy");
+    buyFraction.addEventListener("click", async () => {
+      const realEstate = await getRealEstate();
+      const basePrice = realEstate.basePrice;
+      const realEstateId = realEstate.id;
+      const paymentToken = realEstate.paymentToken;
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      // Approve payment token to contract
+      const paymentTokenContract = new ethers.Contract(
+        paymentToken,
+        ["function approve(address spender, uint256 amount) public returns (bool)"],
+        signer
+      );
+      const tx = await paymentTokenContract.approve(NFT_CONTRACT_ADDRESS, basePrice, {
+        gasLimit: 30000000,
+        gasPrice: ethers.utils.parseEther("0.000000003"),
+      });
+      console.log("Approve tx: ", tx);
+      const receipt = await tx.wait();
+      console.log("Approve receipt: ", receipt);
+
+      // Buy fraction
+      const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, abi, signer);
+      const tx2 = await contract.payAndMintNFT(realEstateId, {
+        gasLimit: 30000000,
+        gasPrice: ethers.utils.parseEther("0.000000003"),
+      });
+      console.log("Buy fraction tx: ", tx2);
+      const receipt2 = await tx2.wait();
+      console.log("Buy fraction receipt: ", receipt2);
     });
   </script>
 </html>

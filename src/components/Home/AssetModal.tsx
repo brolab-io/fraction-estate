@@ -7,8 +7,8 @@ import Button from "../CommonUI/Button";
 import { DocumentDuplicateIcon, PuzzlePieceIcon, WalletIcon } from "@heroicons/react/24/solid";
 
 const AssetModal = () => {
-  const selectedToken = useEstateStore().selectedToken;
-  const isOpen = selectedToken !== "";
+  const selectedRealEstateState = useEstateStore().selectedRealEstateState;
+  const isOpen = !!selectedRealEstateState;
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
@@ -18,7 +18,7 @@ const AssetModal = () => {
               <Image alt="" fill src="/assets/images/estate-placeholder.jpg" />
             </div>
             <div className="px-4 py-3 space-y-0.5 text-black bg-white lg:px-5 lg:py-4">
-              <h2 className="font-semibold">The Tropicana Garden Bao Loc</h2>
+              <h2 className="font-semibold">{selectedRealEstateState?.name || ""}</h2>
               <p className="font-medium text-[#00c805]">RTTG</p>
               <p className="w-full text-sm truncate">
                 With a minimum investment of 1$ in the Tropical Garden project, you will receive a
@@ -32,7 +32,7 @@ const AssetModal = () => {
               <div className="flex justify-between">
                 <div>
                   <div className="text-slate-900">Total raised</div>
-                  <div className="font-bold text-black">$129,872</div>
+                  <div className="font-bold text-black">$129, 872</div>
                 </div>
                 <div>
                   <div className="text-slate-900">Total supply</div>
@@ -69,7 +69,12 @@ const AssetModal = () => {
             </div>
           </div>
           <div className="mt-1.5">
-            <Button className="w-full !rounded-md">View Detail</Button>
+            <Button
+              href={`/projects/${selectedRealEstateState?.id || ""}`}
+              className="w-full !rounded-md"
+            >
+              View Detail
+            </Button>
           </div>
         </div>
       </Transition>

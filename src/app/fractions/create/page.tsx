@@ -3,7 +3,6 @@ import Button from "@/components/CommonUI/Button";
 import Container from "@/components/CommonUI/Container";
 import Input from "@/components/CommonUI/Input";
 import { CONTRACT_NFT_ADDRESS } from "@/configs/contract";
-import useCreateFraction from "@/hooks/useCreateFraction";
 import { utils } from "ethers";
 import { useState } from "react";
 
@@ -19,18 +18,16 @@ const CreateFractionPage = () => {
   const [tokenName, setTokenName] = useState<string>("BLC");
   const [tokenTicker, setTokenTicker] = useState<string>("1000");
 
-  const { mutateAsync, isLoading } = useCreateFraction();
-
   const handleCreateFraction = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await mutateAsync({
-      tokenContract: CONTRACT_NFT_ADDRESS.replace("0x", "xdc"),
-      tokenId,
-      royaltyPercentage,
-      supply: utils.parseEther(supply).toString(),
-      tokenName,
-      tokenTicker,
-    });
+    // await mutateAsync({
+    //   tokenContract: CONTRACT_NFT_ADDRESS.replace("0x", "xdc"),
+    //   tokenId,
+    //   royaltyPercentage,
+    //   supply: utils.parseEther(supply).toString(),
+    //   tokenName,
+    //   tokenTicker,
+    // });
   };
 
   return (
@@ -80,7 +77,7 @@ const CreateFractionPage = () => {
 
         <div className="flex items-center justify-between w-full mt-6">
           <div />
-          <Button isLoading={isLoading} type="submit" className="rounded-md">
+          <Button isLoading={false} type="submit" className="rounded-md">
             Create Fraction{" "}
             <svg
               width="19"

@@ -3,10 +3,24 @@ import AssetModal from "@/components/Home/AssetModal";
 import ConnectWallet from "@/components/Home/ConnectWallet";
 import SearchBar from "@/components/Home/SearchBar";
 import SpaceScene from "@/components/Home/SpaceScene";
-import useFractions from "@/hooks/useFractions";
+import { CONTRACT_NFT_ABI, CONTRACT_NFT_ADDRESS } from "@/configs/contract";
+import useEstateStore from "@/services/store";
+import { useEffect } from "react";
+import { useContractRead } from "wagmi";
 
 const HomePage = () => {
-  useFractions();
+  const { data } = useContractRead<any, any, any>({
+    address: CONTRACT_NFT_ADDRESS,
+    abi: CONTRACT_NFT_ABI,
+    functionName: "getAllRealEstates",
+  });
+  const { setRealEstateStates } = useEstateStore();
+
+  useEffect(() => {
+    if (data) {
+      setRealEstateStates(data);
+    }
+  }, [data, setRealEstateStates]);
 
   return (
     <main className="relative w-full h-full">

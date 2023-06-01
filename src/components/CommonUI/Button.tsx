@@ -1,17 +1,27 @@
 import clsx from "clsx";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useCallback } from "react";
 import Loading from "./Loading";
+import { useRouter } from "next/navigation";
 
 type Props = {
   isLoading?: boolean;
+  href?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 const Button: React.FC<PropsWithChildren<Props>> = ({
   children,
   isLoading,
   className,
+  href,
+  onClick,
   ...rest
 }) => {
+  const router = useRouter();
+
+  const navigate = useCallback(() => {
+    router.push(href || "#");
+  }, [router, href]);
+
   return (
     <button
       className={clsx(
@@ -21,6 +31,7 @@ const Button: React.FC<PropsWithChildren<Props>> = ({
         "focus:ring-none focus:outline-none"
       )}
       disabled={isLoading}
+      onClick={onClick || navigate}
       {...rest}
     >
       {isLoading && <Loading className="inline-block w-4 h-4 mr-2 -mt-1" />}
