@@ -6,7 +6,7 @@ export class CityScene extends Scene {
   private _camera!: ArcRotateCamera;
   private _environment: Environment = new Environment(this);
 
-  constructor(private engine: Engine) {
+  constructor(private engine: Engine, ref: any) {
     super(engine);
 
     this._loadAssets().then(async (result) => {
@@ -20,6 +20,7 @@ export class CityScene extends Scene {
         this.engine.resize();
       });
       this.bindInpspector();
+      ref.current.hide();
     });
   }
 

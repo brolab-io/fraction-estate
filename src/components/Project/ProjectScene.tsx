@@ -3,6 +3,7 @@ import { BuildingScene } from "@/libs/BuildingScene";
 import { Engine } from "@babylonjs/core";
 import { memo, PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
+import FullscreenLoading from "../CommonUI/FullscreenLoading";
 
 const canvasStyle = {
   height: "100%",
@@ -20,10 +21,13 @@ const SpaceScene: React.FC<PropsWithChildren> = ({ children }) => {
       setMounted(true);
     }
   }, []);
-
+  const ref = useRef<any>(null);
   const setupSpace = useCallback(() => {
+    if (!ref.current) {
+      return;
+    }
     const engine = new Engine(canvasRef.current);
-    const scene = new BuildingScene(engine);
+    const scene = new BuildingScene(engine, ref);
     return () => {
       scene.dispose();
       engine.dispose();
@@ -40,6 +44,7 @@ const SpaceScene: React.FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <>
+      <FullscreenLoading ref={ref} />
       <canvas style={canvasStyle} ref={canvasRef} id="space">
         {children}
       </canvas>

@@ -3,11 +3,19 @@ import { Transition } from "@headlessui/react";
 import { Fragment, PropsWithChildren, useCallback, useMemo, useState } from "react";
 import Button from "../CommonUI/Button";
 import clsx from "clsx";
-import { useAccount, useContractRead, useContractWrite, useWaitForTransaction } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useContractRead,
+  useContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { CONTRACT_NFT_ABI, CONTRACT_NFT_ADDRESS } from "@/configs/contract";
 import { RealEstateState } from "@/types/RealEstateState";
 import { utils, BigNumber } from "ethers";
 import Loading from "../CommonUI/Loading";
+import ConnectWallet from "../Home/ConnectWallet";
+import { toast } from "react-toastify";
 type InfoItemProps = {
   label: string;
 };
@@ -35,8 +43,9 @@ type Props = {
 };
 const ProjectModal: React.FC<Props> = ({ realEstateId }) => {
   const [isOpen, setOpen] = useState(true);
+  const { connect } = useConnect();
   const { address } = useAccount();
-  const { data } = useContractRead<any, any, RealEstateState>({
+  const { data, refetch: refetchRealEstate } = useContractRead<any, any, RealEstateState>({
     address: CONTRACT_NFT_ADDRESS,
     abi: CONTRACT_NFT_ABI,
     functionName: "getRealEstate",
@@ -64,7 +73,11 @@ const ProjectModal: React.FC<Props> = ({ realEstateId }) => {
     enabled: !!data,
   });
 
-  const { data: allowanced, refetch: refetchAllowanced } = useContractRead<any, any, BigInt>({
+  const {
+    data: allowanced,
+    refetch: refetchAllowanced,
+    isLoading: isCheckingAllowance,
+  } = useContractRead<any, any, BigInt>({
     address: data?.paymentToken as `0x${string}`,
     abi: [
       {
@@ -149,7 +162,14 @@ const ProjectModal: React.FC<Props> = ({ realEstateId }) => {
     args: [realEstateId],
   });
 
-  const { isLoading: isWatingForBuying } = useWaitForTransaction(buyTx);
+  const { isLoading: isWatingForBuying } = useWaitForTransaction({
+    ...buyTx,
+    onSuccess: () => {
+      toast.success("Real estate bought successfully");
+      refetchRealEstate();
+      refetchAllowanced();
+    },
+  });
 
   const toggleOpen = useCallback(() => {
     setOpen((prev) => !prev);
@@ -198,7 +218,7 @@ const ProjectModal: React.FC<Props> = ({ realEstateId }) => {
         {isOpen ? "Hide" : "Show Info"}
       </Button>
       <Transition appear show={isOpen} as={Fragment}>
-        <div className="fixed w-full max-w-md left-6 top-20">
+        <div className="fixed z-50 w-full max-w-md left-6 top-20">
           <div className="p-6 space-y-4 overflow-hidden bg-white rounded-lg">
             <Tabs />
             <div className="text-xl font-bold text-black truncate">{data?.name || ""}</div>
@@ -226,24 +246,30 @@ const ProjectModal: React.FC<Props> = ({ realEstateId }) => {
               <InfoItem label="Network">XDC</InfoItem>
               <InfoItem label="Asset">1</InfoItem>
             </div>
-            {isApprovedEnough ? (
-              <Button
-                isLoading={isBuying || isWatingForBuying}
-                onClick={() => buy?.()}
-                className="w-full !rounded-md !py-2.5"
-              >
-                Invest
-              </Button>
-            ) : (
-              <Button
-                isLoading={isApproving || isWatingForApprove}
-                onClick={() => approve?.()}
-                className="w-full !rounded-md !py-2.5"
-              >
-                Approve {utils.formatEther(data?.basePrice.toString() || "0")}{" "}
-                {tokenSymbol ? tokenSymbol : <Loading className="inline-block w-3 h-3" />} To Invest
-              </Button>
-            )}
+            <div className="flex items-center justify-center">
+              {!address ? <ConnectWallet /> : null}
+            </div>
+            {address ? (
+              isApprovedEnough ? (
+                <Button
+                  isLoading={isBuying || isWatingForBuying || isCheckingAllowance}
+                  onClick={() => buy?.()}
+                  className="w-full !rounded-md !py-2.5"
+                >
+                  Invest
+                </Button>
+              ) : (
+                <Button
+                  isLoading={isApproving || isWatingForApprove || isCheckingAllowance}
+                  onClick={() => approve?.()}
+                  className="w-full !rounded-md !py-2.5"
+                >
+                  Approve {utils.formatEther(data?.basePrice.toString() || "0")}{" "}
+                  {tokenSymbol ? tokenSymbol : <Loading className="inline-block w-3 h-3" />} To
+                  Invest
+                </Button>
+              )
+            ) : null}
           </div>
         </div>
       </Transition>

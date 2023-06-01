@@ -1,5 +1,6 @@
 import Web3Provider from "@/components/Web3Provider";
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { Inter } from "next/font/google";
 import dynamic from "next/dynamic";
 

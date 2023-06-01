@@ -1,4 +1,4 @@
-import { AbstractMesh, ISceneLoaderProgressEvent, SceneLoader } from "@babylonjs/core";
+import { AbstractMesh, ISceneLoaderProgressEvent, SceneLoader, Vector3 } from "@babylonjs/core";
 
 import { BuildingScene } from "./BuildingScene";
 
@@ -24,6 +24,7 @@ export class BuildingEntity {
     );
 
     const env = result.meshes[0];
+    env.scaling = new Vector3(0.3, 0.3, 0.3);
     const allMeshes = result.meshes;
 
     return {

@@ -8,4 +8,5 @@ export type RealEstateState = {
   fractionMinted: BigInt;
   basePower: BigInt;
   basePrice: BigInt;
+  apy: BigInt;
 };

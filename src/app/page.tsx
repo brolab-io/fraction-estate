@@ -5,7 +5,7 @@ import SearchBar from "@/components/Home/SearchBar";
 import SpaceScene from "@/components/Home/SpaceScene";
 import { CONTRACT_NFT_ABI, CONTRACT_NFT_ADDRESS } from "@/configs/contract";
 import useEstateStore from "@/services/store";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useContractRead } from "wagmi";
 
 const HomePage = () => {
@@ -23,9 +23,9 @@ const HomePage = () => {
   }, [data, setRealEstateStates]);
 
   return (
-    <main className="relative w-full h-full">
+    <main className="relative w-full h-full bg-white">
       <SpaceScene />
-      <div className="absolute top-0 left-0 right-0 flex justify-between p-6">
+      <div className="absolute top-0 left-0 right-0 z-50 flex justify-between p-6">
         <SearchBar />
         <ConnectWallet />
       </div>

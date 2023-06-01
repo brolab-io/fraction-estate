@@ -1,270 +1,261 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./NFT.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract NFTStaking {
-    IERC20 public immutable rewardsToken;
-    address public nftContract;
-    address public owner;
+contract NFTContract is ERC721, Ownable {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIdCounter;
+    Counters.Counter private _realEstateIdCounter;
 
-    // Pool struct
-    struct Pool {
-        // Duration of rewards to be paid out (in seconds)
-        uint duration;
-        // Timestamp of when the rewards finish
-        uint finishAt;
-        // Minimum of last updated time and reward finish time
-        uint updatedAt;
-        // Reward to be paid out per second
-        uint rewardRate;
-        // Sum of (reward rate * dt * 1e18 / total supply)
-        uint rewardPerTokenStored;
-        // User address => rewardPerTokenStored
-        mapping(address => uint) userRewardPerTokenPaid;
-        // User address => rewards to be claimed
-        mapping(address => uint) rewards;
-        mapping(uint256 => address) oldOwner;
-        // Total staked
-        uint totalSupply;
-        // User address => staked amount
-        mapping(address => uint) balanceOf;
-        uint256 realEstateId;
-        // Pool Balance
-        uint256 poolBalance;
+    struct RealEstate {
+        uint256 id;
+        string name;
+        string uri;
+        uint256 basePrice;
+        uint256 basePower;
+        uint256 apy;
+        address owner;
+        uint256 numberOfFraction;
+        address paymentToken;
+        uint256 fractionMinted;
     }
 
-    Pool[] public pools;
+    mapping(uint256 => RealEstate) public realEstates;
 
-    event nftStaked(
-        uint256 tokenId,
-        address user,
-        uint256 tokenPower,
-        uint256 userBalance,
-        uint256 totalSupply
+    // token name
+    mapping(uint256 => string) public _names;
+
+    // token uri
+    mapping(uint256 => string) public _tokenURIs;
+
+    // token realEstate id
+    mapping(uint256 => uint256) public _realEstateIds;
+
+    // token market price
+    mapping(uint256 => uint256) public _tokenPowers;
+
+    string private _baseURIextended;
+
+    constructor(
+        string memory name,
+        string memory symbol
+    ) ERC721(name, symbol) {}
+
+    /////// EVENT
+    event RealEstateUpdated(
+        uint256 id,
+        string name,
+        string uri,
+        uint256 basePrice,
+        uint256 basePower,
+        address owner,
+        uint256 numberOfFraction,
+        address paymentToken
     );
-    event withdrawed(uint256 tokenId, address user, uint256 index);
-
-    constructor(address _rewardsToken, address _nftContract) {
-        owner = msg.sender;
-        rewardsToken = IERC20(_rewardsToken);
-        nftContract = _nftContract;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "not authorized");
-        _;
-    }
-
-    modifier updateReward(uint _index, address _account) {
-        pools[_index].rewardPerTokenStored = rewardPerToken(_index);
-        pools[_index].updatedAt = lastTimeRewardApplicable(_index);
-
-        if (_account != address(0)) {
-            pools[_index].rewards[_account] = earned(_account, _index);
-            pools[_index].userRewardPerTokenPaid[_account] = pools[_index]
-                .rewardPerTokenStored;
-        }
-
-        _;
-    }
-
-    function lastTimeRewardApplicable(uint _index) public view returns (uint) {
-        // Code
-        if (block.timestamp <= pools[_index].finishAt) {
-            return (block.timestamp);
-        } else {
-            return pools[_index].finishAt;
-        }
-    }
-
-    function rewardPerToken(uint _index) public view returns (uint) {
-        // Code
-        if (pools[_index].totalSupply == 0) {
-            return pools[_index].rewardPerTokenStored;
-        }
-        uint time = lastTimeRewardApplicable(_index);
-        return
-            pools[_index].rewardPerTokenStored +
-            (pools[_index].rewardRate *
-                (time - pools[_index].updatedAt) *
-                1e18) /
-            pools[_index].totalSupply;
-    }
-
-    function stake(
-        uint256 tokenId_,
-        uint _index
-    ) external updateReward(_index, msg.sender) {
-        // Code
-        require(
-            nftcontract(nftContract).ownerOf(tokenId_) == msg.sender,
-            "sender is not owner of token"
-        );
-        require(
-            nftcontract(nftContract).getApproved(tokenId_) == address(this) ||
-                nftcontract(nftContract).isApprovedForAll(
-                    msg.sender,
-                    address(this)
-                ),
-            "The contract is unauthorized to manage this token"
-        );
-        require(
-            nftcontract(nftContract).getrealEstateId(tokenId_) ==
-                pools[_index].realEstateId,
-            "realEstate Id is not match"
-        );
-        uint256 tokenPower = nftcontract(nftContract).getPower(tokenId_);
-        require(tokenPower > 0, "token power must be greater than 0");
-        nftcontract(nftContract).transferFrom(
-            msg.sender,
-            address(this),
-            tokenId_
-        );
-        pools[_index].balanceOf[msg.sender] =
-            pools[_index].balanceOf[msg.sender] +
-            tokenPower;
-        pools[_index].totalSupply = pools[_index].totalSupply + tokenPower;
-        pools[_index].oldOwner[tokenId_] = msg.sender;
-        emit nftStaked(
-            tokenId_,
-            msg.sender,
-            tokenPower,
-            pools[_index].balanceOf[msg.sender],
-            pools[_index].totalSupply
-        );
-    }
-
-    function withdraw(
-        uint256 tokenId_,
-        uint _index
-    ) external updateReward(_index, msg.sender) {
-        // Code
-        require(
-            pools[_index].oldOwner[tokenId_] == msg.sender,
-            "not the old owner"
-        );
-        uint256 tokenPower = nftcontract(nftContract).getPower(tokenId_);
-        pools[_index].balanceOf[msg.sender] -= tokenPower;
-        pools[_index].totalSupply -= tokenPower;
-        nftcontract(nftContract).transferFrom(
-            address(this),
-            msg.sender,
-            tokenId_
-        );
-        emit withdrawed(tokenId_, msg.sender, _index);
-    }
-
-    function earned(address _account, uint _index) public view returns (uint) {
-        // Code
-        return
-            ((pools[_index].balanceOf[_account] *
-                (rewardPerToken(_index) -
-                    pools[_index].userRewardPerTokenPaid[_account])) / 1e18) +
-            pools[_index].rewards[_account];
-    }
-
-    function getReward(uint _index) external updateReward(_index, msg.sender) {
-        // Code
-        uint reward = pools[_index].rewards[msg.sender];
-        if (reward > 0) {
-            pools[_index].rewards[msg.sender] = 0;
-            rewardsToken.transfer(msg.sender, reward);
-            pools[_index].poolBalance -= reward;
-        }
-    }
-
-    function setRewardsDuration(uint _duration, uint _index) external {
-        // Code
-        require(
-            nftcontract(nftContract).getrealEstateOwner(
-                pools[_index].realEstateId
-            ) == msg.sender,
-            "not realEstate owner"
-        );
-        require(
-            block.timestamp > pools[_index].finishAt,
-            "previous reward duration not finished"
-        );
-        pools[_index].duration = _duration;
-    }
-
-    function notifyRewardAmount(
-        uint _amount,
-        uint _index
-    ) external updateReward(_index, address(0)) {
-        require(
-            nftcontract(nftContract).getrealEstateOwner(
-                pools[_index].realEstateId
-            ) == msg.sender,
-            "not realEstate owner"
-        );
-        // Code
-        if (block.timestamp >= pools[_index].finishAt) {
-            pools[_index].rewardRate = _amount / pools[_index].duration;
-        } else {
-            pools[_index].rewardRate =
-                (_amount +
-                    pools[_index].rewardRate *
-                    (pools[_index].finishAt - block.timestamp)) /
-                pools[_index].duration;
-        }
-        require(
-            pools[_index].rewardRate > 0,
-            "Reward rate must greater than zero"
-        );
-        require(
-            pools[_index].rewardRate * pools[_index].duration <=
-                pools[_index].poolBalance,
-            "Reward amount > balance"
-        );
-        pools[_index].updatedAt = block.timestamp;
-        pools[_index].finishAt = block.timestamp + pools[_index].duration;
-    }
-
-    function _min(uint x, uint y) private pure returns (uint) {
-        return x <= y ? x : y;
-    }
-
-    function getPower(uint256 _tokenId) public view returns (uint256) {
-        return (nftcontract(nftContract).getPower(_tokenId));
-    }
-
-    function createPool(uint _realEstateId) external {
-        Pool storage newPool = pools.push();
-        newPool.realEstateId = _realEstateId;
-    }
-
-    function deposit(uint _amount, uint _index) external payable {
-        require(_amount > 0, "amount must greater than zero");
-        rewardsToken.transferFrom(msg.sender, address(this), _amount);
-        pools[_index].poolBalance += _amount;
-    }
-
-    function getPoolIdByrealEstateId(
+    event TokenMinted(
+        uint256 tokenId,
+        address recipient,
+        string tokenURI,
+        string name,
         uint256 realEstateId
-    ) public view returns (bool check, uint256 poolId) {
-        for (uint256 i = 0; i < pools.length; i++) {
-            if (pools[i].realEstateId == realEstateId) {
-                return (true, i);
+    );
+
+    ////// FUNCTION
+
+    // BaseURI
+    function setBaseURI(string memory baseURI) external onlyOwner {
+        _baseURIextended = baseURI;
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _baseURIextended;
+    }
+
+    function createRealEstate(
+        string memory name,
+        string memory uri,
+        uint256 basePrice,
+        uint256 basePower,
+        uint256 apy,
+        uint256 numberOfFraction,
+        address paymentToken
+    ) public onlyOwner returns (uint256) {
+        // check paymentToken is ERC20
+        require(
+            IERC20(paymentToken).totalSupply() > 0,
+            "paymentToken is not ERC20"
+        );
+
+        _realEstateIdCounter.increment();
+        uint256 newId = _realEstateIdCounter.current();
+        realEstates[newId] = RealEstate(
+            newId,
+            name,
+            uri,
+            basePrice,
+            basePower,
+            apy,
+            msg.sender,
+            numberOfFraction,
+            paymentToken,
+            0
+        );
+        _emitRealEstateUpdated(realEstates[newId]);
+        return newId;
+    }
+
+    function getAllRealEstates() public view returns (RealEstate[] memory) {
+        RealEstate[] memory _realEstates = new RealEstate[](
+            _realEstateIdCounter.current()
+        );
+        for (uint256 i = 1; i <= _realEstateIdCounter.current(); i++) {
+            _realEstates[i - 1] = realEstates[i];
+        }
+        return _realEstates;
+    }
+
+    function getRealEstate(
+        uint256 realEstateId
+    ) public view returns (RealEstate memory) {
+        require(realEstates[realEstateId].id != 0, "RealEstate does not exist");
+        return realEstates[realEstateId];
+    }
+
+    // Mint NFT
+    function mintNFT(
+        address recipient,
+        string memory tokenURI,
+        string memory name,
+        uint256 realEstateId
+    ) public returns (uint256) {
+        RealEstate storage _realEstate = realEstates[realEstateId];
+
+        // check realEstateId is valid
+        require(_realEstate.id != 0, "RealEstate does not exist");
+
+        require(
+            _realEstate.fractionMinted < _realEstate.numberOfFraction,
+            "RealEstate is sold out"
+        );
+
+        _tokenIdCounter.increment();
+        uint256 newItemId = _tokenIdCounter.current();
+        _mint(recipient, newItemId);
+        _realEstate.fractionMinted += 1;
+        _names[newItemId] = name;
+        _realEstateIds[newItemId] = realEstateId;
+        _tokenURIs[newItemId] = tokenURI;
+        _tokenPowers[newItemId] = _realEstate.basePower;
+        _emitTokenMinted(newItemId);
+        return newItemId;
+    }
+
+    // user must pay with paymentToken in realEstate and amount must be equal to realEstate.basePrice
+    function payAndMintNFT(uint256 realEstateId) public returns (uint256) {
+        RealEstate storage _realEstate = realEstates[realEstateId];
+
+        // check realEstateId is valid
+        require(_realEstate.id != 0, "RealEstate does not exist");
+
+        require(
+            _realEstate.fractionMinted < _realEstate.numberOfFraction,
+            "RealEstate is sold out"
+        );
+
+        // check user has enough paymentToken
+        require(
+            IERC20(_realEstate.paymentToken).balanceOf(msg.sender) >=
+                _realEstate.basePrice,
+            "Not enough paymentToken"
+        );
+
+        // transfer paymentToken from user to realEstate owner
+        IERC20(_realEstate.paymentToken).transferFrom(
+            msg.sender,
+            _realEstate.owner,
+            _realEstate.basePrice
+        );
+
+        _tokenIdCounter.increment();
+        uint256 newItemId = _tokenIdCounter.current();
+        _mint(msg.sender, newItemId);
+        _realEstate.fractionMinted += 1;
+        _names[newItemId] = _realEstate.name;
+        _realEstateIds[newItemId] = realEstateId;
+        _tokenURIs[newItemId] = _realEstate.uri;
+        _tokenPowers[newItemId] = _realEstate.basePower;
+        _emitTokenMinted(newItemId);
+        return newItemId;
+    }
+
+    function getTokenIdsByAddress(
+        address owner
+    ) public view returns (uint256[] memory) {
+        uint256[] memory _tokenIds = new uint256[](balanceOf(owner));
+        uint256 _counter = 0;
+        for (uint256 i = 0; i < _tokenIdCounter.current(); i++) {
+            if (_ownerOf(i) == owner) {
+                _tokenIds[_counter] = i;
+                _counter++;
             }
         }
-        return (false, 0);
+        return _tokenIds;
     }
 
-    function getUserTotalPowerStaked(
-        address _userAddress,
-        uint _index
-    ) public view returns (uint256) {
-        return (pools[_index].balanceOf[_userAddress]);
+    function getTokenById(
+        uint256 tokenId
+    )
+        public
+        view
+        returns (
+            string memory name,
+            string memory tokenURI,
+            uint256 realEstateId,
+            address owner,
+            uint256 power
+        )
+    {
+        require(_exists(tokenId), "nft not exists");
+        owner = _ownerOf(tokenId);
+        name = _names[tokenId];
+        tokenURI = _tokenURIs[tokenId];
+        realEstateId = _realEstateIds[tokenId];
+        power = _tokenPowers[tokenId];
     }
 
-    function getUserTotalEarned(
-        address _userAddress,
-        uint _index
-    ) public view returns (uint256) {
-        return (pools[_index].rewards[_userAddress]);
+    function supply() public view returns (uint256) {
+        return _tokenIdCounter.current();
+    }
+
+    function realEstateSupply() public view returns (uint256) {
+        return _realEstateIdCounter.current();
+    }
+
+    function _emitRealEstateUpdated(RealEstate memory _realEstate) internal {
+        emit RealEstateUpdated(
+            _realEstate.id,
+            _realEstate.name,
+            _realEstate.uri,
+            _realEstate.basePrice,
+            _realEstate.basePower,
+            _realEstate.owner,
+            _realEstate.numberOfFraction,
+            _realEstate.paymentToken
+        );
+    }
+
+    function _emitTokenMinted(uint256 _tokenId) internal {
+        emit TokenMinted(
+            _tokenId,
+            ownerOf(_tokenId),
+            _tokenURIs[_tokenId],
+            _names[_tokenId],
+            _realEstateIds[_tokenId]
+        );
     }
 }
