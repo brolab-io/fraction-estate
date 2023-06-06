@@ -26,7 +26,7 @@ export class CityEntity {
     const result = await SceneLoader.ImportMeshAsync(
       null,
       "/assets/models/",
-      "model-city.glb",
+      "map2.glb",
       this._scene,
       this._processLoaderProgress
     );

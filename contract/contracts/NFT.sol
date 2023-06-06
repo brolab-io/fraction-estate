@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -193,6 +193,20 @@ contract NFTContract is ERC721, Ownable {
         return newItemId;
     }
 
+    function getTokenIdsByAddress(
+        address owner
+    ) public view returns (uint256[] memory) {
+        uint256[] memory _tokenIds = new uint256[](balanceOf(owner));
+        uint256 _counter = 0;
+        for (uint256 i = 0; i < _tokenIdCounter.current(); i++) {
+            if (_ownerOf(i) == owner) {
+                _tokenIds[_counter] = i;
+                _counter++;
+            }
+        }
+        return _tokenIds;
+    }
+
     function getTokenById(
         uint256 tokenId
     )
@@ -212,6 +226,14 @@ contract NFTContract is ERC721, Ownable {
         tokenURI = _tokenURIs[tokenId];
         realEstateId = _realEstateIds[tokenId];
         power = _tokenPowers[tokenId];
+    }
+
+    function supply() public view returns (uint256) {
+        return _tokenIdCounter.current();
+    }
+
+    function realEstateSupply() public view returns (uint256) {
+        return _realEstateIdCounter.current();
     }
 
     function _emitRealEstateUpdated(RealEstate memory _realEstate) internal {
