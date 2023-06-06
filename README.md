@@ -5,6 +5,9 @@ Are you tired of missing out on real estate investments due to high costs and li
 ## Video Demo
 https://www.youtube.com/watch?v=cgbX25k85IA
 
+## Pitch Deck
+https://docs.google.com/presentation/d/1fdLp3WX0Syq8HOio-PYW9DqlHpC4UVSiBNDv9SSgTCI/edit?usp=sharing 
+
 ## Problem:
 Limited Access: Traditional real estate investments often require significant capital, excluding a large portion of potential investors from participating in the market.
 
