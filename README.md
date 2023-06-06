@@ -20,6 +20,9 @@ Lack of Diversification: The barriers to entry in real estate often limit invest
 ## Solution:
 NFTBrick is bridging the gap between real estate and blockchain technology. By leveraging the power of fractional NFTs, we are providing a platform that allows investors to buy and sell fractionalized portions of real estate. This groundbreaking approach enables everyone to invest in properties they are passionate about, regardless of their financial limitations.
 
+## How it work
+![](https://images.viblo.asia/8182b93c-6201-457c-98b9-3298ada84d97.png)
+
 ## Features:
 Fractional Ownership: NFTBrick enables fractional ownership of real estate through NFTs, allowing anyone to invest in and own a portion of high-value properties.
 
