@@ -5,6 +5,9 @@ const nextConfig = {
     return config;
   },
   output: "standalone",
+  images: {
+    domains: ["w3s.link"],
+  },
 };
 
 module.exports = nextConfig;

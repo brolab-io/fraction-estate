@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract marketplace is Ownable {
+contract Marketplace is Ownable {
     using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.AddressSet;
     Counters.Counter private _orderIdCount;

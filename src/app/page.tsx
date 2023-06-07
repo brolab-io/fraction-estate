@@ -3,6 +3,8 @@ import AssetModal from "@/components/Home/AssetModal";
 import ConnectWallet from "@/components/Home/ConnectWallet";
 import SearchBar from "@/components/Home/SearchBar";
 import SpaceScene from "@/components/Home/SpaceScene";
+import ListMyNFT from "@/components/MyNFT/ListMyNFT";
+import MyNFTModal from "@/components/MyNFT/MyNFTModal";
 import { CONTRACT_NFT_ABI, CONTRACT_NFT_ADDRESS } from "@/configs/contract";
 import useEstateStore from "@/services/store";
 import { useEffect, useRef } from "react";
@@ -30,6 +32,9 @@ const HomePage = () => {
         <ConnectWallet />
       </div>
       <AssetModal />
+      <div className="absolute z-50 flex gap-4 bottom-4 right-4">
+        <MyNFTModal />
+      </div>
     </main>
   );
 };
