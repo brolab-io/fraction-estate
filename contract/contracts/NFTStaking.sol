@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.13;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./NFT.sol";
 
@@ -31,14 +31,14 @@ contract StakingRewards {
         uint totalSupply;
         // User address => staked amount
         mapping(address => uint) balanceOf;
-        uint256 collectionId;
+        uint256 realEstateId;
         // Pool Balance
         uint256 poolBalance;
     }
 
     Pool[] public pools;
 
-    event NFTStaked(
+    event nftStaked(
         uint256 tokenId,
         address user,
         uint256 tokenPower,
@@ -100,25 +100,27 @@ contract StakingRewards {
     ) external updateReward(_index, msg.sender) {
         // Code
         require(
-            nftcontract(nftContract).ownerOf(_tokenId) == msg.sender,
+            NFTContract(nftContract).ownerOf(_tokenId) == msg.sender,
             "sender is not owner of token"
         );
         require(
-            nftcontract(nftContract).getApproved(_tokenId) == address(this) ||
-                nftcontract(nftContract).isApprovedForAll(
+            NFTContract(nftContract).getApproved(_tokenId) == address(this) ||
+                NFTContract(nftContract).isApprovedForAll(
                     msg.sender,
                     address(this)
                 ),
             "The contract is unauthorized to manage this token"
         );
-        require(
-            nftcontract(nftContract).getCollectionId(_tokenId) ==
-                pools[_index].collectionId,
-            "Collection Id is not match"
+        uint256 realEstateId = NFTContract(nftContract)._realEstateIds(
+            _tokenId
         );
-        uint256 tokenPower = nftcontract(nftContract).getPower(_tokenId);
+        require(
+            realEstateId == pools[_index].realEstateId,
+            "realEstate Id is not match"
+        );
+        uint256 tokenPower = NFTContract(nftContract)._tokenPowers(_tokenId);
         require(tokenPower > 0, "token power must be greater than 0");
-        nftcontract(nftContract).transferFrom(
+        NFTContract(nftContract).transferFrom(
             msg.sender,
             address(this),
             _tokenId
@@ -128,7 +130,7 @@ contract StakingRewards {
             tokenPower;
         pools[_index].totalSupply = pools[_index].totalSupply + tokenPower;
         pools[_index].oldOwner[_tokenId] = msg.sender;
-        emit NFTStaked(
+        emit nftStaked(
             _tokenId,
             msg.sender,
             tokenPower,
@@ -146,10 +148,10 @@ contract StakingRewards {
             pools[_index].oldOwner[_tokenId] == msg.sender,
             "not the old owner"
         );
-        uint256 tokenPower = nftcontract(nftContract).getPower(_tokenId);
+        uint256 tokenPower = NFTContract(nftContract)._tokenPowers(_tokenId);
         pools[_index].balanceOf[msg.sender] -= tokenPower;
         pools[_index].totalSupply -= tokenPower;
-        nftcontract(nftContract).transferFrom(
+        NFTContract(nftContract).transferFrom(
             address(this),
             msg.sender,
             _tokenId
@@ -177,13 +179,9 @@ contract StakingRewards {
     }
 
     function setRewardsDuration(uint _duration, uint _index) external {
-        // Code
-        require(
-            nftcontract(nftContract).getCollectionOwner(
-                pools[_index].collectionId
-            ) == msg.sender,
-            "not collection owner"
-        );
+        NFTContract.RealEstate memory realEstate = NFTContract(nftContract)
+            .getRealEstate(pools[_index].realEstateId);
+        require(realEstate.owner == msg.sender, "not realEstate owner");
         require(
             block.timestamp > pools[_index].finishAt,
             "previous reward duration not finished"
@@ -195,12 +193,9 @@ contract StakingRewards {
         uint _amount,
         uint _index
     ) external updateReward(_index, address(0)) {
-        require(
-            nftcontract(nftContract).getCollectionOwner(
-                pools[_index].collectionId
-            ) == msg.sender,
-            "not collection owner"
-        );
+        NFTContract.RealEstate memory realEstate = NFTContract(nftContract)
+            .getRealEstate(pools[_index].realEstateId);
+        require(realEstate.owner == msg.sender, "not realEstate owner");
         // Code
         if (block.timestamp >= pools[_index].finishAt) {
             pools[_index].rewardRate = _amount / pools[_index].duration;
@@ -229,12 +224,12 @@ contract StakingRewards {
     }
 
     function getPower(uint256 _tokenId) public view returns (uint256) {
-        return (nftcontract(nftContract).getPower(_tokenId));
+        return (NFTContract(nftContract)._tokenPowers(_tokenId));
     }
 
-    function createPool(uint _collectionId) external {
+    function createPool(uint _realEstateId) external {
         Pool storage newPool = pools.push();
-        newPool.collectionId = _collectionId;
+        newPool.realEstateId = _realEstateId;
     }
 
     function deposit(uint _amount, uint _index) external payable {
@@ -243,11 +238,11 @@ contract StakingRewards {
         pools[_index].poolBalance += _amount;
     }
 
-    function getPoolIdByCollectionId(
-        uint256 collectionId
+    function getPoolIdByrealEstateId(
+        uint256 realEstateId
     ) public view returns (bool check, uint256 poolId) {
         for (uint256 i = 0; i < pools.length; i++) {
-            if (pools[i].collectionId == collectionId) {
+            if (pools[i].realEstateId == realEstateId) {
                 return (true, i);
             }
         }
