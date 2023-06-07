@@ -1,34 +1,36 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+ 
 
-## Getting Started
+Are you tired of missing out on real estate investments due to high costs and limited access? Look no further! NFTBrick is revolutionizing the real estate market by offering a groundbreaking solution - fractionalized NFTs. Now, anyone can own a piece of real estate, regardless of their budget or location.
+## Try out demo
+https://nftbrick.brolab.dev/
 
-First, run the development server:
+## Video Demo
+https://www.youtube.com/watch?v=cgbX25k85IA
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## Pitch Deck
+https://docs.google.com/presentation/d/1fdLp3WX0Syq8HOio-PYW9DqlHpC4UVSiBNDv9SSgTCI/edit?usp=sharing 
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Problem:
+Limited Access: Traditional real estate investments often require significant capital, excluding a large portion of potential investors from participating in the market.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+High Costs: The high cost of real estate properties makes it challenging for individuals with limited financial resources to enter the market and benefit from potential returns.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Lack of Diversification: The barriers to entry in real estate often limit investors' ability to diversify their portfolios, leading to a concentration of wealth in a single asset class.
 
-## Learn More
+## Solution:
+NFTBrick is bridging the gap between real estate and blockchain technology. By leveraging the power of fractional NFTs, we are providing a platform that allows investors to buy and sell fractionalized portions of real estate. This groundbreaking approach enables everyone to invest in properties they are passionate about, regardless of their financial limitations.
 
-To learn more about Next.js, take a look at the following resources:
+## How it work
+![](https://images.viblo.asia/8182b93c-6201-457c-98b9-3298ada84d97.png)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features:
+Fractional Ownership: NFTBrick enables fractional ownership of real estate through NFTs, allowing anyone to invest in and own a portion of high-value properties.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Immersive 3D Visualization: With the integration of three.js technology, NFTBrick offers users a visually stunning and immersive 3D experience, allowing them to explore and evaluate properties before making investment decisions.
 
-## Deploy on Vercel
+Peer-to-Peer Marketplace: NFTBrick provides a peer-to-peer marketplace where users can buy, sell, and trade fractionalized real estate NFTs, fostering a vibrant and dynamic community of investors.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Vision:
+At NFTBrick, our vision is to reshape the real estate industry, empowering individuals from all walks of life to become property owners. We aim to create a global marketplace where everyone can invest in real estate assets, unlock new revenue streams, and build wealth. By combining blockchain technology and 3D visualization, we are revolutionizing the way people perceive and engage with real estate investments.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Join NFTBrick today and embark on a journey towards a more inclusive and accessible real estate market. Start investing in fractions of real estate and witness the power of fractional NFT ownership firsthand.
