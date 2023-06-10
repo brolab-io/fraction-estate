@@ -7,9 +7,10 @@ import ListMyNFT from "@/components/MyNFT/ListMyNFT";
 import MarketplaceModal from "@/components/MyNFT/MarketplaceModal";
 import MyNFTModal from "@/components/MyNFT/MyNFTModal";
 import StakingModel from "@/components/MyNFT/StakingModel";
+import PoolDetailModal from "@/components/Pool/PoolDetailModal";
 import { CONTRACT_NFT_ABI, CONTRACT_NFT_ADDRESS } from "@/configs/contract";
 import useEstateStore from "@/services/store";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useContractRead } from "wagmi";
 
 const HomePage = () => {
@@ -19,6 +20,7 @@ const HomePage = () => {
     functionName: "getAllRealEstates",
   });
   const { setRealEstateStates } = useEstateStore();
+  const [selectedPoolId, setSelectedPoolId] = useState<string>("");
 
   useEffect(() => {
     if (data) {
@@ -36,8 +38,9 @@ const HomePage = () => {
       <AssetModal />
       <div className="absolute z-50 flex gap-4 bottom-4 right-4">
         <MarketplaceModal />
-        <StakingModel />
+        <StakingModel setSelectedPoolId={setSelectedPoolId} />
         <MyNFTModal />
+        <PoolDetailModal poolId={selectedPoolId} />
       </div>
     </main>
   );

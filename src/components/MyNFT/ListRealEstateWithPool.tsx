@@ -16,9 +16,10 @@ import React, { useEffect, useMemo, useState } from "react";
 
 type Props = {
   handleClose: () => void;
+  setSelectedPoolId: (poolId: string) => void;
 };
 
-const ListRealEstateWithPool: React.FC<Props> = ({ handleClose }) => {
+const ListRealEstateWithPool: React.FC<Props> = ({ handleClose, setSelectedPoolId }) => {
   const { realEstateStates } = useEstateStore();
   const [viewOnlyMyRealEstate, setViewOnlyMyRealEstate] = useState(false);
   const address = useAccount().address;
@@ -30,7 +31,7 @@ const ListRealEstateWithPool: React.FC<Props> = ({ handleClose }) => {
   return (
     <div className="p-6 lg:p-8 bg-[#171923]/90 rounded-lg space-y-4 lg:space-y-6 h-full">
       <div className="flex items-center justify-between text-2xl font-bold">
-        <div>List Pools</div>
+        <div className="text-white">List Pools</div>
         <XMarkIcon className="cursor-pointer w-7 h-7" onClick={handleClose} color="white" />
       </div>
       <div className="flex items-center gap-2">
@@ -39,12 +40,19 @@ const ListRealEstateWithPool: React.FC<Props> = ({ handleClose }) => {
           checked={viewOnlyMyRealEstate}
           onChange={(e) => setViewOnlyMyRealEstate(e.target.checked)}
         />
-        <span>View only my real estates</span>
+        <span className="text-white">View only my real estates</span>
       </div>
       <div>
         <div className="flex flex-col gap-y-2 lg:gap-y-4">
           {filteredRealEstateStates.map((realEstate) => {
-            return <RealEstateItem realEstate={realEstate} key={realEstate.id.toString()} />;
+            return (
+              <RealEstateItem
+                handleClose={handleClose}
+                setSelectedPoolId={setSelectedPoolId}
+                realEstate={realEstate}
+                key={realEstate.id.toString()}
+              />
+            );
           })}
         </div>
       </div>
@@ -54,8 +62,14 @@ const ListRealEstateWithPool: React.FC<Props> = ({ handleClose }) => {
 
 type RealEstateItemProps = {
   realEstate: RealEstateState;
+  handleClose: () => void;
+  setSelectedPoolId: (poolId: string) => void;
 };
-const RealEstateItem: React.FC<RealEstateItemProps> = ({ realEstate }) => {
+const RealEstateItem: React.FC<RealEstateItemProps> = ({
+  handleClose,
+  realEstate,
+  setSelectedPoolId,
+}) => {
   const { data: metadata } = useQuery(["metadata", realEstate.uri], fetchMetadata, {
     enabled: !!realEstate.uri,
   });
@@ -85,7 +99,7 @@ const RealEstateItem: React.FC<RealEstateItemProps> = ({ realEstate }) => {
         </div>
         <div className="space-y-2">
           <h3 className="w-full text-xl font-semibold text-white truncate">{realEstate.name}</h3>
-          <p>
+          <p className="text-white">
             Pool ID:{" "}
             {isCheckingPool
               ? "Checking..."
@@ -98,7 +112,15 @@ const RealEstateItem: React.FC<RealEstateItemProps> = ({ realEstate }) => {
           )}
         </div>
       </div>
-      <div>{hasPool && <PoolInfo poolId={poolId} />}</div>
+      <div>
+        {hasPool && (
+          <PoolInfo
+            handleClose={handleClose}
+            setSelectedPoolId={setSelectedPoolId}
+            poolId={poolId}
+          />
+        )}
+      </div>
     </div>
   );
 };
@@ -143,8 +165,10 @@ const CreatePool: React.FC<CreatePoolProps> = ({ realEstateId, refetchPool }) =>
 
 type PoolInfoProps = {
   poolId: string;
+  setSelectedPoolId: (poolId: string) => void;
+  handleClose: () => void;
 };
-const PoolInfo: React.FC<PoolInfoProps> = ({ poolId }) => {
+const PoolInfo: React.FC<PoolInfoProps> = ({ poolId, handleClose, setSelectedPoolId }) => {
   const { address } = useAccount();
   const { data: powerStaked } = useContractRead<any, any, any>({
     address: CONTRACT_STAKING_ADDRESS,
@@ -169,11 +193,18 @@ const PoolInfo: React.FC<PoolInfoProps> = ({ poolId }) => {
 
   console.log("poolTotalReward", poolTotalReward);
 
+  const onClick = () => {
+    setSelectedPoolId(poolId);
+    handleClose();
+  };
+
   return (
     <div className="space-y-2">
-      <div>Power staked: {powerStaked?.toString() || 0}</div>
-      <div>Total earned: {totalEarned?.toString() || 0}</div>
-      <Button className="!rounded-md !py-2 !px-5">View Detail</Button>
+      <div className="text-white">Power staked: {powerStaked?.toString() || 0}</div>
+      <div className="text-white">Total earned: {totalEarned?.toString() || 0}</div>
+      <Button onClick={onClick} className="!rounded-md !py-2 !px-5">
+        View Detail
+      </Button>
     </div>
   );
 };

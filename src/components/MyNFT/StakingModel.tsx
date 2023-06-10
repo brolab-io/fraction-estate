@@ -1,10 +1,13 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import Button from "../CommonUI/Button";
-import ListMyNFT from "./ListMyNFT";
 import ListRealEstateWithPool from "./ListRealEstateWithPool";
 
-const StakingModel = () => {
+type Props = {
+  setSelectedPoolId: (poolId: string) => void;
+};
+
+const StakingModel: React.FC<Props> = ({ setSelectedPoolId }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => {
@@ -54,7 +57,10 @@ const StakingModel = () => {
       >
         <div className="fixed inset-0 flex items-center justify-center bg-black/70">
           <div className="w-full max-w-[90%] lg:max-w-[900px] xl:max-w-[1200px] h-full max-h-[90%]">
-            <ListRealEstateWithPool handleClose={closeModal} />
+            <ListRealEstateWithPool
+              setSelectedPoolId={setSelectedPoolId}
+              handleClose={closeModal}
+            />
           </div>
         </div>
       </Transition>

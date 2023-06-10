@@ -1,4 +1,4 @@
-import { Dialog, Transition } from "@headlessui/react";
+import { Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import Button from "../CommonUI/Button";
 import ListMyNFT from "./ListMyNFT";
